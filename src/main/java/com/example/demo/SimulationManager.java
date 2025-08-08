@@ -56,54 +56,54 @@ public class SimulationManager {
         // SECURITY: Validated minimal system with proper positioning for visibility
         bodies.clear();
         
-        // Sun at center - large and bright
-        Star sun = new Star("sun", 1.989e30, 50, 
+        // Sun at center - large and bright (2x larger as requested)
+        Star sun = new Star("sun", 1.989e30, 100, 
             new float[]{1.0f, 0.9f, 0.2f}, true,  // Bright yellow
             Vector3D.ZERO, Vector3D.ZERO, 3.828e26);
         bodies.put("sun", sun);
         
-        // Mercury - closest to sun
-        Planet mercury = new Planet("mercury", 3.301e23, 15,
+        // Mercury - closest to sun (3.5% of Sun's diameter)
+        Planet mercury = new Planet("mercury", 3.301e23, 3.5,
             new float[]{0.7f, 0.7f, 0.7f}, false,  // Gray
             Vector3D.obtain(120, 0, 0), Vector3D.ZERO,
             "sun", false);
         mercury.setParentBody(sun);
         bodies.put("mercury", mercury);
         
-        // Venus - second planet
-        Planet venus = new Planet("venus", 4.867e24, 18,
+        // Venus - second planet (8.7% of Sun's diameter)
+        Planet venus = new Planet("venus", 4.867e24, 8.7,
             new float[]{1.0f, 0.8f, 0.4f}, false,  // Yellow-orange
             Vector3D.obtain(180, 0, 0), Vector3D.ZERO,
             "sun", false);
         venus.setParentBody(sun);
         bodies.put("venus", venus);
         
-        // Earth - third planet (blue)
-        Planet earth = new Planet("earth", 5.972e24, 20,
+        // Earth - third planet (9.2% of Sun's diameter)
+        Planet earth = new Planet("earth", 5.972e24, 9.2,
             new float[]{0.2f, 0.6f, 1.0f}, false,  // Blue
             Vector3D.obtain(250, 0, 0), Vector3D.ZERO,
             "sun", false);
         earth.setParentBody(sun);
         bodies.put("earth", earth);
         
-        // Mars - fourth planet (red)
-        Planet mars = new Planet("mars", 6.39e23, 16,
+        // Mars - fourth planet (4.9% of Sun's diameter)
+        Planet mars = new Planet("mars", 6.39e23, 4.9,
             new float[]{1.0f, 0.4f, 0.2f}, false,  // Red
             Vector3D.obtain(320, 0, 0), Vector3D.ZERO,
             "sun", false);
         mars.setParentBody(sun);
         bodies.put("mars", mars);
         
-        // Jupiter - large gas giant
-        Planet jupiter = new Planet("jupiter", 1.898e27, 35,
+        // Jupiter - large gas giant (10.0% of Sun's diameter)
+        Planet jupiter = new Planet("jupiter", 1.898e27, 10.0,
             new float[]{0.8f, 0.6f, 0.3f}, false,  // Orange-brown
             Vector3D.obtain(420, 0, 0), Vector3D.ZERO,
             "sun", true);  // Gas giant
         jupiter.setParentBody(sun);
         bodies.put("jupiter", jupiter);
         
-        // Saturn - with rings (visually distinctive)
-        Planet saturn = new Planet("saturn", 5.683e26, 30,
+        // Saturn - with rings (8.3% of Sun's diameter)
+        Planet saturn = new Planet("saturn", 5.683e26, 8.3,
             new float[]{0.9f, 0.8f, 0.6f}, false,  // Pale yellow
             Vector3D.obtain(520, 0, 0), Vector3D.ZERO,
             "sun", true);  // Gas giant (will show rings)
