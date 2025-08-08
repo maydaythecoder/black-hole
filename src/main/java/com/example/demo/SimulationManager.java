@@ -23,12 +23,6 @@ public class SimulationManager {
     }
     
     public void loadSolarSystem() {
-        // TEMPORARY: Force simple system for visibility testing
-        System.out.println("Using simplified solar system for debugging...");
-        createMinimalSystem();
-        
-        // TODO: Re-enable JSON loading after fixing visibility issues
-        /*
         try {
             // SECURITY: Use absolute path validation
             String resourcePath = "solar_system.json";
@@ -36,20 +30,95 @@ public class SimulationManager {
                 getClass().getClassLoader().getResource(resourcePath).getPath()
             );
             
+            // Scale astronomical distances to fit within grid plane (±400 units)
             bodies.clear();
-            bodies.putAll(loadedBodies);
             
-            System.out.println("Loaded " + bodies.size() + " celestial bodies");
+            // Grid positioning for planets
+            double[] gridDistances = {0, 60, 100, 150, 200, 300, 400}; 
+            String[] planetIds = {"sun", "mercury", "venus", "earth", "mars", "jupiter", "saturn"};
+            
+            // Scale each body's position and size to fit grid
+            for (Map.Entry<String, CelestialBody> entry : loadedBodies.entrySet()) {
+                CelestialBody body = entry.getValue();
+                
+                // Find matching distance for this body
+                double scaledDistance = 0;
+                for (int i = 0; i < planetIds.length; i++) {
+                    if (body.getId().equals(planetIds[i])) {
+                        scaledDistance = gridDistances[i];
+                        break;
+                    }
+                }
+                
+                // Create position on grid plane (Y=0)
+                Vector3D scaledPos;
+                if (scaledDistance == 0) {
+                    scaledPos = Vector3D.ZERO; // Sun at center
+                } else {
+                    scaledPos = Vector3D.obtain(scaledDistance, 0, 0); // Line up on X-axis
+                }
+                
+                // Scale radius for visibility while keeping proportions
+                double scaledRadius;
+                if (body instanceof Star) {
+                    scaledRadius = 25; // Sun size for visibility
+                } else {
+                    // Scale planet radii relative to original proportions
+                    scaledRadius = Math.max(body.getRadius() * 5e-7, 1.5); // Minimum 1.5 units
+                }
+                
+                // Create new scaled body
+                CelestialBody scaledBody;
+                if (body instanceof Star) {
+                    Star star = (Star) body;
+                    scaledBody = new Star(star.getId(), star.getMass(), scaledRadius,
+                        star.getColor(), star.isStatic(), scaledPos, Vector3D.ZERO, star.getLuminosity());
+                } else if (body instanceof Planet) {
+                    Planet planet = (Planet) body;
+                    scaledBody = new Planet(planet.getId(), planet.getMass(), scaledRadius,
+                        planet.getColor(), planet.isStatic(), scaledPos, Vector3D.ZERO,
+                        planet.getParentId(), planet.isGasGiant());
+                } else if (body instanceof Spacecraft) {
+                    Spacecraft craft = (Spacecraft) body;
+                    scaledBody = new Spacecraft(craft.getId(), craft.getMass(), scaledRadius,
+                        craft.getColor(), craft.isStatic(), scaledPos, Vector3D.ZERO,
+                        craft.getThrustPower(), craft.getFuel());
+                } else {
+                    scaledBody = body;
+                }
+                
+                bodies.put(entry.getKey(), scaledBody);
+            }
+            
+            // Set up parent relationships
+            for (CelestialBody body : bodies.values()) {
+                if (body instanceof Planet) {
+                    Planet planet = (Planet) body;
+                    CelestialBody parent = bodies.get(planet.getParentId());
+                    if (parent != null) {
+                        planet.setParentBody(parent);
+                    }
+                }
+            }
+            
+            System.out.println("Loaded " + bodies.size() + " celestial bodies (scaled for grid plane)");
             bodies.forEach((id, body) -> 
-                System.out.println("  - " + id + ": " + body.getClass().getSimpleName())
+                System.out.println("  - " + id + " at (" + body.getPosition().x + ", " + body.getPosition().y + ", " + body.getPosition().z + ") radius: " + body.getRadius())
             );
+            
+            // Debug: Verify scaling worked
+            CelestialBody earth = bodies.get("earth");
+            if (earth != null) {
+                System.out.println("DEBUG: Earth position after scaling: " + earth.getPosition().x + ", " + earth.getPosition().y + ", " + earth.getPosition().z);
+                System.out.println("DEBUG: Earth radius after scaling: " + earth.getRadius());
+            }
             
         } catch (Exception e) {
             System.err.println("Failed to load solar system data: " + e.getMessage());
-            // Fallback: Create minimal system
+            e.printStackTrace();
+            System.out.println("Using fallback minimal system with realistic scaling...");
             createMinimalSystem();
         }
-        */
     }
     
     private void createMinimalSystem() {
@@ -116,8 +185,9 @@ public class SimulationManager {
     public void update(double deltaTime) {
         if (paused) return;
         
-        // TEMPORARY: Disable physics to keep planets in lineup for visibility test
-        // TODO: Re-enable physics after confirming visibility
+        // TEMPORARY: Disable physics to avoid BarnesHutTree infinite recursion with scaled positions
+        // The physics engine has issues when multiple bodies are at similar positions
+        // TODO: Fix BarnesHutTree to handle small position differences properly
         /*
         // SECURITY: Bounds checking on time scale
         double clampedTimeScale = Math.max(MIN_TIME_SCALE, 

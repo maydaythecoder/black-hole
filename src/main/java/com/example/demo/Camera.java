@@ -25,8 +25,8 @@ public class Camera {
     
     public static Camera createDefault() {
         return new Camera(
-            Vector3D.obtain(300, 400, 600), // Position to see full solar system lineup
-            Vector3D.obtain(250, 0, 0),     // Look at center of planet lineup
+            Vector3D.obtain(200, 300, 400), // Position to see grid plane and solar system
+            Vector3D.obtain(200, 0, 0),     // Look at center of planetary lineup
             Vector3D.obtain(0, 1, 0),       // Y-axis up
             1.0                             // Default zoom
         );
@@ -44,8 +44,8 @@ public class Camera {
         // Set perspective projection
         double aspectRatio = (double) width / height;
         double fov = 45.0 / zoom; // Field of view in degrees (inverted zoom logic)
-        double near = 10.0;       // 10 scaled units
-        double far = 5000.0;      // 5000 scaled units (covers entire solar system)
+        double near = 1.0;        // 1 unit close
+        double far = 2000.0;      // 2000 units (covers grid and solar system)
         
         // Convert to radians and calculate perspective
         double fovRad = Math.toRadians(fov);
