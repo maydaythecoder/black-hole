@@ -11,24 +11,30 @@ This is a Java project designed to be a starting point for building features wit
 ## 3. Coding Standards & Best Practices
 
 ### Java Language
+
 - **Effective Java:** Follow the principles of "Effective Java" by Joshua Bloch.
 - **Modern Java:** Use modern Java features (e.g., lambdas, streams, `Optional`) where appropriate.
 - **Exception Handling:** Use checked exceptions for recoverable conditions and unchecked exceptions for programming errors.
 
 ### Code Style
+
 - **Google Java Style Guide:** Follow the Google Java Style Guide for consistent code formatting.
 
 ### Security
+
 - **API Key Management:** Never hardcode API keys in your source code. Use environment variables (e.g., `GEMINI_API_KEY`) to manage your credentials securely.
 
 ### Testing
+
 - **JUnit/TestNG:** Write unit tests using JUnit or TestNG.
 - **Mockito:** Use a mocking framework like Mockito to isolate components for testing.
 
 ## 4. Building with the Java Generative AI SDK
 
 ### Adding the Dependency
+
 **Maven (`pom.xml`):**
+
 ```xml
 <dependency>
     <groupId>com.google.genai</groupId>
@@ -38,11 +44,13 @@ This is a Java project designed to be a starting point for building features wit
 ```
 
 **Gradle (`build.gradle`):**
+
 ```groovy
 implementation 'com.google.genai:google-genai:0.1.0' // Check for the latest version
 ```
 
 ### Initializing the Client
+
 Create a `GenerativeModel` instance to interact with the Gemini API.
 
 ```java
@@ -62,6 +70,7 @@ try (VertexAI vertexAI = new VertexAI(projectId, location)) {
 ```
 
 ### Generate Text from Text
+
 Send a text prompt and get a text response.
 
 ```java
@@ -73,6 +82,7 @@ System.out.println(response);
 ```
 
 ### Generate Text from Text and Image (Multimodal)
+
 Send both images and text in a single prompt.
 
 ```java
@@ -99,6 +109,7 @@ System.out.println(response);
 ```
 
 ### Multi-turn Conversations (Chat)
+
 For a conversational experience, use a `ChatSession`.
 
 ```java

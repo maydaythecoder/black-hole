@@ -17,7 +17,7 @@
     <java.version>17</java.version>
     <lwjgl.version>3.3.2</lwjgl.version>
     <!-- Choose based on your OS -->
-    <lwjgl.natives>natives-windows</lwjgl.natives>
+    <lwjgl.natives>natives-macos-arm64</lwjgl.natives>
     <!-- Other options: 
          natives-linux, natives-macos, natives-macos-arm64 
     -->
@@ -91,6 +91,9 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <jvmArguments>-XstartOnFirstThread</jvmArguments>
+        </configuration>
       </plugin>
     </plugins>
   </build>
