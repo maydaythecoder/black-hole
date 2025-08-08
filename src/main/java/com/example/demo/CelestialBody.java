@@ -2,6 +2,9 @@ package com.example.demo;
 
 public class CelestialBody {
 
+    static final double G = 6.674e-11;
+    static final double MAX_DISTANCE = 1e16; // Optimization threshold
+
     protected final String id;
     protected final double mass;
     protected final double radius;
@@ -11,19 +14,21 @@ public class CelestialBody {
     protected Vector3D velocity;
 
     public CelestialBody(String id, double mass, double radius, float[] color, Vector3D position, Vector3D velocity) {
-        if (mass <= 0 || radius <= 0) {
-            throw new IllegalArgumentException("Mass and radius must be positive.");
-        }
-        if (color == null || color.length != 3) {
-            throw new IllegalArgumentException("Color must be an RGB array of size 3.");
-        }
+        validateCelestialBody(mass, radius);  // Validate before assignment
+        
         this.id = id;
         this.mass = mass;
         this.radius = radius;
-        this.color = color;
+        this.color = color != null && color.length == 3 ? color : new float[]{1.0f, 1.0f, 1.0f}; // Default to white if null or invalid
         this.isStatic = false; // Default value
         this.position = position;
         this.velocity = velocity;
+    }
+
+    protected static void validateCelestialBody(double mass, double radius) {
+        if (mass <= 0 || radius <= 0) {
+            throw new IllegalArgumentException("Mass and radius must be positive.");
+        }
     }
 
     public void updatePosition(double deltaTime) {
@@ -34,6 +39,21 @@ public class CelestialBody {
         if (!isStatic) {
             velocity = velocity.add(force.scale(deltaTime / mass));
         }
+    }
+
+    public static Vector3D calculateGravity(CelestialBody a, CelestialBody b) {
+        if (a.isStatic && b.isStatic) return Vector3D.ZERO;
+        
+        // Use subtract() instead of sub()
+        Vector3D delta = b.position.subtract(a.position);
+        
+        double dist = delta.length();
+        // Avoid division by zero and very large distances
+        if (dist > MAX_DISTANCE || dist < 1e-5) {
+            return Vector3D.ZERO;
+        }
+        double force = (G * a.mass * b.mass) / (dist * dist);
+        return delta.normalize().scale(force);
     }
 
     // Getters (add more as needed)

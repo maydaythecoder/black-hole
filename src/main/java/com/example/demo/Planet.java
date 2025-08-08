@@ -9,6 +9,7 @@ public class Planet extends CelestialBody {
     public Planet(String id, double mass, double radius, float[] color, boolean isStatic, Vector3D position, Vector3D velocity, String parentId, boolean isGasGiant) {
         super(id, mass, radius, color, position, velocity);
         setStatic(isStatic);
+        validateCelestialBody(mass, radius);
 
         this.parentId = parentId;
         this.isGasGiant = isGasGiant;

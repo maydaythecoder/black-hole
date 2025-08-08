@@ -1,10 +1,15 @@
 package com.example.demo;
 
-
 public class Vector3D {
     public final double x;
     public final double y;
     public final double z;
+
+    // TODO: Implement object pooling for Vector3D instances to improve performance
+    // by reducing garbage collection overhead.
+    
+    // Add ZERO constant
+    public static final Vector3D ZERO = new Vector3D(0, 0, 0);
 
     public Vector3D(double x, double y, double z) {
         this.x = x;
@@ -43,7 +48,7 @@ public class Vector3D {
     public Vector3D normalize() {
         double length = length();
         if (length == 0) {
-            return new Vector3D(0, 0, 0); // Or throw an exception
+            return ZERO; // Use ZERO constant
         }
         return new Vector3D(x / length, y / length, z / length);
     }

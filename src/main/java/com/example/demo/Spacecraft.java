@@ -13,6 +13,7 @@ public class Spacecraft extends CelestialBody {
         setStatic(isStatic);
         this.thrustPower = thrustPower;
         this.fuel = fuel;
+        CelestialBody.validateCelestialBody(this.mass, this.radius);
     }
 
     public double getThrustPower() {
