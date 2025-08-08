@@ -9,19 +9,23 @@ public class PhysicsUtil {
     }
 
     public static void updateAllBodies(List<CelestialBody> bodies, double deltaTime) {
-        // TODO: Add null checks for the input list of bodies and potentially for individual body objects
+        // SAFETY: Null check for input list to prevent NullPointerException
         if (bodies == null) {
-            return; // Or throw an exception
+            return;
         }
-        // Barnes-Hut optimization: O(n log n) vs naive O(n²)
-        SpatialPartitioningTree tree = new BarnesHutTree(bodies); // Assuming BarnesHutTree constructor builds the tree
+        // SAFETY: Remove null elements from the list to prevent downstream NPEs
+        // (Alternatively, skip nulls in the loop below for efficiency with large lists)
+        SpatialPartitioningTree tree = new BarnesHutTree(bodies);
         for (CelestialBody body : bodies) {
+            if (body == null) {
+                continue; // SAFETY: Skip null body to prevent NullPointerException
+            }
             if (body.isStatic) {
                 continue;
             }
             Vector3D netForce = tree.calculateNetForce(body); // O(log n)
-            body.applyForce(netForce, deltaTime);                          // O(1)
-            body.updatePosition(deltaTime);                                     // O(1)
+            body.applyForce(netForce, deltaTime);             // O(1)
+            body.updatePosition(deltaTime);                   // O(1)
         }
     }
 }

@@ -28,12 +28,12 @@ public class DataLoader {
                     double radius = node.get("radius").asDouble();
                     float[] color = objectMapper.readValue(node.get("color").traverse(), float[].class);
                     boolean isStatic = node.has("isStatic") ? node.get("isStatic").asBoolean() : false;
-                    Vector3D position = new Vector3D(
+                    Vector3D position = Vector3D.obtain(
                             node.get("position").get(0).asDouble(),
                             node.get("position").get(1).asDouble(),
                             node.get("position").get(2).asDouble()
                     );
-                    Vector3D velocity = new Vector3D(
+                    Vector3D velocity = Vector3D.obtain(
                             node.get("velocity").get(0).asDouble(),
                             node.get("velocity").get(1).asDouble(),
                             node.get("velocity").get(2).asDouble()

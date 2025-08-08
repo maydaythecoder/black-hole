@@ -68,6 +68,12 @@ public class StarRenderer implements BodyRenderer {
         // Draw sphere using quad approximation
         drawSphere(radius, 16, 16);
         
+        // Debug: Print when actually drawing
+        if (System.currentTimeMillis() % 10000 < 100) {
+            System.out.printf("Drawing Star %s at (%.1f, %.1f, %.1f) with radius %.1f%n",
+                star.getId(), pos.x, pos.y, pos.z, radius);
+        }
+        
         // Reset material properties
         float[] noEmission = {0.0f, 0.0f, 0.0f, 1.0f};
         GL11.glMaterialfv(GL11.GL_FRONT, GL11.GL_EMISSION, noEmission);

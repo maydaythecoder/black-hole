@@ -111,7 +111,7 @@ public class BarnesHutTree extends SpatialPartitioningTree {
         }
 
         double maxSize = Math.max(Math.max(maxX - minX, maxY - minY), maxZ - minZ);
-        Vector3D center = new Vector3D(
+        Vector3D center = Vector3D.obtain(
             (minX + maxX) / 2.0,
             (minY + maxY) / 2.0,
             (minZ + maxZ) / 2.0
@@ -183,7 +183,7 @@ public class BarnesHutTree extends SpatialPartitioningTree {
         double offsetX = ((octantIndex & 4) != 0) ? halfSize : -halfSize;
         double offsetY = ((octantIndex & 2) != 0) ? halfSize : -halfSize;
         double offsetZ = ((octantIndex & 1) != 0) ? halfSize : -halfSize;
-        return parentCenter.add(new Vector3D(offsetX, offsetY, offsetZ));
+        return parentCenter.add(Vector3D.obtain(offsetX, offsetY, offsetZ));
     }
 
     @Override

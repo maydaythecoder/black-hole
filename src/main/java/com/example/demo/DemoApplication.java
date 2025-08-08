@@ -145,22 +145,22 @@ public class DemoApplication {
         double moveSpeed = 1e9; // 1 million km
         
         if (keys[GLFW.GLFW_KEY_W]) {
-            cameraMovement = cameraMovement.add(new Vector3D(0, 0, -moveSpeed));
+            cameraMovement = cameraMovement.add(Vector3D.obtain(0, 0, -moveSpeed));
         }
         if (keys[GLFW.GLFW_KEY_S]) {
-            cameraMovement = cameraMovement.add(new Vector3D(0, 0, moveSpeed));
+            cameraMovement = cameraMovement.add(Vector3D.obtain(0, 0, moveSpeed));
         }
         if (keys[GLFW.GLFW_KEY_A]) {
-            cameraMovement = cameraMovement.add(new Vector3D(-moveSpeed, 0, 0));
+            cameraMovement = cameraMovement.add(Vector3D.obtain(-moveSpeed, 0, 0));
         }
         if (keys[GLFW.GLFW_KEY_D]) {
-            cameraMovement = cameraMovement.add(new Vector3D(moveSpeed, 0, 0));
+            cameraMovement = cameraMovement.add(Vector3D.obtain(moveSpeed, 0, 0));
         }
         if (keys[GLFW.GLFW_KEY_Q]) {
-            cameraMovement = cameraMovement.add(new Vector3D(0, moveSpeed, 0));
+            cameraMovement = cameraMovement.add(Vector3D.obtain(0, moveSpeed, 0));
         }
         if (keys[GLFW.GLFW_KEY_E]) {
-            cameraMovement = cameraMovement.add(new Vector3D(0, -moveSpeed, 0));
+            cameraMovement = cameraMovement.add(Vector3D.obtain(0, -moveSpeed, 0));
         }
         
         if (cameraMovement.length() > 0) {
@@ -175,6 +175,9 @@ public class DemoApplication {
         GL11.glDepthFunc(GL11.GL_LESS);
         GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glCullFace(GL11.GL_BACK);
+        GL11.glFrontFace(GL11.GL_CCW);  // Counter-clockwise front faces
+        
+        System.out.println("OpenGL initialized. Rendering should begin...");
         
         // Main loop
         while (!GLFW.glfwWindowShouldClose(window)) {

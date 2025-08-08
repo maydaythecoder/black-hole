@@ -9,7 +9,6 @@ public class SimulationManager {
     private final Camera camera;
     private double timeScale;
     private boolean paused;
-    private long lastUpdateTime;
     
     // SECURITY: Simulation bounds prevent runaway calculations
     private static final double MAX_TIME_SCALE = 1e6;  // Max 1 million times speed
@@ -21,10 +20,15 @@ public class SimulationManager {
         this.camera = Camera.createDefault();
         this.timeScale = 86400.0; // Start at 1 day per second
         this.paused = false;
-        this.lastUpdateTime = System.nanoTime();
     }
     
     public void loadSolarSystem() {
+        // TEMPORARY: Force simple system for visibility testing
+        System.out.println("Using simplified solar system for debugging...");
+        createMinimalSystem();
+        
+        // TODO: Re-enable JSON loading after fixing visibility issues
+        /*
         try {
             // SECURITY: Use absolute path validation
             String resourcePath = "solar_system.json";
@@ -45,32 +49,76 @@ public class SimulationManager {
             // Fallback: Create minimal system
             createMinimalSystem();
         }
+        */
     }
     
     private void createMinimalSystem() {
-        // SECURITY: Validated minimal system as fallback
+        // SECURITY: Validated minimal system with proper positioning for visibility
         bodies.clear();
         
-        // Sun
-        Star sun = new Star("sun", 1.989e30, 6.96e8, 
-            new float[]{1.0f, 0.8f, 0.0f}, true,
+        // Sun at center - large and bright
+        Star sun = new Star("sun", 1.989e30, 50, 
+            new float[]{1.0f, 0.9f, 0.2f}, true,  // Bright yellow
             Vector3D.ZERO, Vector3D.ZERO, 3.828e26);
         bodies.put("sun", sun);
         
-        // Earth
-        Planet earth = new Planet("earth", 5.972e24, 6.371e6,
-            new float[]{0.0f, 0.5f, 1.0f}, false,
-            new Vector3D(1.496e11, 0, 0), new Vector3D(0, 29780, 0),
+        // Mercury - closest to sun
+        Planet mercury = new Planet("mercury", 3.301e23, 15,
+            new float[]{0.7f, 0.7f, 0.7f}, false,  // Gray
+            Vector3D.obtain(120, 0, 0), Vector3D.ZERO,
+            "sun", false);
+        mercury.setParentBody(sun);
+        bodies.put("mercury", mercury);
+        
+        // Venus - second planet
+        Planet venus = new Planet("venus", 4.867e24, 18,
+            new float[]{1.0f, 0.8f, 0.4f}, false,  // Yellow-orange
+            Vector3D.obtain(180, 0, 0), Vector3D.ZERO,
+            "sun", false);
+        venus.setParentBody(sun);
+        bodies.put("venus", venus);
+        
+        // Earth - third planet (blue)
+        Planet earth = new Planet("earth", 5.972e24, 20,
+            new float[]{0.2f, 0.6f, 1.0f}, false,  // Blue
+            Vector3D.obtain(250, 0, 0), Vector3D.ZERO,
             "sun", false);
         earth.setParentBody(sun);
         bodies.put("earth", earth);
         
-        System.out.println("Created minimal solar system (Sun + Earth)");
+        // Mars - fourth planet (red)
+        Planet mars = new Planet("mars", 6.39e23, 16,
+            new float[]{1.0f, 0.4f, 0.2f}, false,  // Red
+            Vector3D.obtain(320, 0, 0), Vector3D.ZERO,
+            "sun", false);
+        mars.setParentBody(sun);
+        bodies.put("mars", mars);
+        
+        // Jupiter - large gas giant
+        Planet jupiter = new Planet("jupiter", 1.898e27, 35,
+            new float[]{0.8f, 0.6f, 0.3f}, false,  // Orange-brown
+            Vector3D.obtain(420, 0, 0), Vector3D.ZERO,
+            "sun", true);  // Gas giant
+        jupiter.setParentBody(sun);
+        bodies.put("jupiter", jupiter);
+        
+        // Saturn - with rings (visually distinctive)
+        Planet saturn = new Planet("saturn", 5.683e26, 30,
+            new float[]{0.9f, 0.8f, 0.6f}, false,  // Pale yellow
+            Vector3D.obtain(520, 0, 0), Vector3D.ZERO,
+            "sun", true);  // Gas giant (will show rings)
+        saturn.setParentBody(sun);
+        bodies.put("saturn", saturn);
+        
+        System.out.println("Created complete solar system lineup - Sun to Saturn");
     }
     
     public void update(double deltaTime) {
         if (paused) return;
         
+        // TEMPORARY: Disable physics to keep planets in lineup for visibility test
+        // TODO: Re-enable physics after confirming visibility
+        /*
         // SECURITY: Bounds checking on time scale
         double clampedTimeScale = Math.max(MIN_TIME_SCALE, 
                                   Math.min(MAX_TIME_SCALE, timeScale));
@@ -79,23 +127,19 @@ public class SimulationManager {
         // Update physics
         List<CelestialBody> bodyList = new ArrayList<>(bodies.values());
         PhysicsUtil.updateAllBodies(bodyList, scaledDeltaTime);
+        */
         
         // Update camera to follow interesting objects
         updateCameraTarget();
     }
     
     private void updateCameraTarget() {
-        // Follow Earth if it exists, otherwise follow the first planet
-        CelestialBody target = bodies.get("earth");
-        if (target == null) {
-            target = bodies.values().stream()
-                .filter(body -> body instanceof Planet)
-                .findFirst()
-                .orElse(bodies.get("sun"));
-        }
-        
-        if (target != null) {
-            camera.setTarget(target.getPosition());
+        // Always look at the sun (center of solar system) for proper view
+        CelestialBody sun = bodies.get("sun");
+        if (sun != null) {
+            // Set camera target to sun position, but scaled for rendering
+            Vector3D sunPos = scalePositionForRendering(sun.getPosition());
+            camera.setTarget(sunPos);
         }
     }
     
