@@ -6,9 +6,20 @@ import java.util.stream.Collectors;
 import java.util.LinkedHashMap;
 
 public class Renderer {
+    
+    private final GridRenderer gridRenderer;
+    
+    public Renderer() {
+        // Grid spans 20x20 with 50 unit spacing (covers solar system)
+        this.gridRenderer = new GridRenderer(20, 50);
+    }
 
     public void render(List<CelestialBody> bodies) {
-        // Use strategy pattern for rendering
+        // Draw grid first (background)
+        gridRenderer.setupGL();
+        gridRenderer.draw();
+        
+        // Use strategy pattern for rendering celestial bodies
         Map<Class<?>, BodyRenderer> renderers = Map.of(
             Star.class, new StarRenderer(),
             Planet.class, new PlanetRenderer(),

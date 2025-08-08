@@ -201,23 +201,13 @@ public class SimulationManager {
     }
     
     private Vector3D scalePositionForRendering(Vector3D position) {
-        // Scale down astronomical distances for rendering
-        double scale = 1e-9; // 1 billion to 1
-        return position.scale(scale);
+        // No scaling needed - positions are already set for visibility
+        return position; // Keep original positions as they're already sized for rendering
     }
     
     private double scaleRadiusForRendering(double radius) {
-        // Scale and enforce minimum size for visibility
-        double scaledRadius = radius * 1e-7; // Scale down more moderately
-        
-        // Different minimum sizes based on object type
-        if (radius > 1e8) { // Sun-sized objects
-            return Math.max(scaledRadius, 20); // Large minimum for stars
-        } else if (radius > 1e7) { // Gas giant sized
-            return Math.max(scaledRadius, 10); // Medium for gas giants
-        } else { // Smaller planets and spacecraft
-            return Math.max(scaledRadius, 5); // Small minimum for planets
-        }
+        // No scaling needed - radii are already set for visibility
+        return radius; // Keep original radii as they're already sized for rendering
     }
     
     // Control methods

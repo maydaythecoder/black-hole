@@ -142,7 +142,7 @@ public class DemoApplication {
     private void handleContinuousInput() {
         // SECURITY: Safe camera movement with bounds checking
         Vector3D cameraMovement = Vector3D.ZERO;
-        double moveSpeed = 1e9; // 1 million km
+        double moveSpeed = 50; // 50 units movement speed for scaled system
         
         if (keys[GLFW.GLFW_KEY_W]) {
             cameraMovement = cameraMovement.add(Vector3D.obtain(0, 0, -moveSpeed));
