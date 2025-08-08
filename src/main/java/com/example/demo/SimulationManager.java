@@ -185,32 +185,22 @@ public class SimulationManager {
     public void update(double deltaTime) {
         if (paused) return;
         
-        // TEMPORARY: Disable physics to avoid BarnesHutTree infinite recursion with scaled positions
-        // The physics engine has issues when multiple bodies are at similar positions
-        // TODO: Fix BarnesHutTree to handle small position differences properly
-        /*
         // SECURITY: Bounds checking on time scale
         double clampedTimeScale = Math.max(MIN_TIME_SCALE, 
                                   Math.min(MAX_TIME_SCALE, timeScale));
         double scaledDeltaTime = deltaTime * clampedTimeScale;
         
-        // Update physics
+        // Update physics (BarnesHutTree now handles small position differences properly)
         List<CelestialBody> bodyList = new ArrayList<>(bodies.values());
         PhysicsUtil.updateAllBodies(bodyList, scaledDeltaTime);
-        */
         
         // Update camera to follow interesting objects
         updateCameraTarget();
     }
     
     private void updateCameraTarget() {
-        // Always look at the sun (center of solar system) for proper view
-        CelestialBody sun = bodies.get("sun");
-        if (sun != null) {
-            // Set camera target to sun position, but scaled for rendering
-            Vector3D sunPos = scalePositionForRendering(sun.getPosition());
-            camera.setTarget(sunPos);
-        }
+        // Free camera mode - no automatic targeting needed
+        // Camera movement is now fully user controlled
     }
     
     public void render(int width, int height) {
@@ -246,7 +236,7 @@ public class SimulationManager {
     
     private CelestialBody createRenderableBody(CelestialBody original) {
         // SECURITY: Create safe copies for rendering with proper scaling
-        Vector3D scaledPosition = scalePositionForRendering(original.getPosition());
+        Vector3D scaledPosition = original.getPosition(); // Direct position - no scaling needed
         double scaledRadius = scaleRadiusForRendering(original.getRadius());
         
         // Create a display copy with scaled dimensions
@@ -301,8 +291,8 @@ public class SimulationManager {
     }
     
     // Camera controls
-    public void orbitCamera(double deltaX, double deltaY) {
-        camera.orbitAroundTarget(deltaX * 0.01, deltaY * 0.01);
+    public void rotateCamera(double deltaYaw, double deltaPitch) {
+        camera.rotate(deltaYaw, deltaPitch);
     }
     
     public void zoomCamera(double factor) {
@@ -311,6 +301,10 @@ public class SimulationManager {
     
     public void moveCamera(Vector3D offset) {
         camera.moveCamera(offset);
+    }
+    
+    public void moveRelativeCamera(double forward, double right, double up) {
+        camera.moveRelative(forward, right, up);
     }
     
     // Getters

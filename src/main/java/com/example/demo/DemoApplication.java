@@ -62,13 +62,14 @@ public class DemoApplication {
         lastTime = GLFW.glfwGetTime();
         
         System.out.println("\n=== SOLAR SYSTEM SIMULATION CONTROLS ===");
-        System.out.println("ESC     - Exit simulation");
-        System.out.println("SPACE   - Pause/Resume simulation");
-        System.out.println("R       - Reset time scale");
-        System.out.println("+/-     - Increase/Decrease time scale");
-        System.out.println("Mouse   - Orbit camera around target");
-        System.out.println("Scroll  - Zoom in/out");
-        System.out.println("WASD    - Move camera");
+        System.out.println("ESC        - Exit simulation");
+        System.out.println("SPACE      - Pause/Resume simulation");
+        System.out.println("R          - Reset time scale");
+        System.out.println("+/-        - Increase/Decrease time scale");
+        System.out.println("Mouse Drag - Free-look camera rotation");
+        System.out.println("Scroll     - Zoom in/out");
+        System.out.println("WASD       - Move forward/back/left/right");
+        System.out.println("Q/E        - Move down/up");
         System.out.println("======================================\n");
     }
     
@@ -99,7 +100,9 @@ public class DemoApplication {
             if (mousePressed) {
                 double deltaX = xpos - mouseX;
                 double deltaY = ypos - mouseY;
-                simulation.orbitCamera(deltaX, deltaY);
+                // Convert pixel movement to rotation (sensitivity adjustment)
+                double sensitivity = 0.002; // SECURITY: Limited sensitivity prevents extreme rotation
+                simulation.rotateCamera(deltaX * sensitivity, -deltaY * sensitivity); // Negative Y for natural movement
             }
             mouseX = xpos;
             mouseY = ypos;
@@ -144,27 +147,31 @@ public class DemoApplication {
         Vector3D cameraMovement = Vector3D.ZERO;
         double moveSpeed = 50; // 50 units movement speed for scaled system
         
+        double forward = 0, right = 0, up = 0;
+        
+        // Free-move camera controls (relative to camera orientation)
         if (keys[GLFW.GLFW_KEY_W]) {
-            cameraMovement = cameraMovement.add(Vector3D.obtain(0, 0, -moveSpeed));
+            forward += moveSpeed; // Move forward
         }
         if (keys[GLFW.GLFW_KEY_S]) {
-            cameraMovement = cameraMovement.add(Vector3D.obtain(0, 0, moveSpeed));
+            forward -= moveSpeed; // Move backward
         }
         if (keys[GLFW.GLFW_KEY_A]) {
-            cameraMovement = cameraMovement.add(Vector3D.obtain(-moveSpeed, 0, 0));
+            right -= moveSpeed; // Strafe left
         }
         if (keys[GLFW.GLFW_KEY_D]) {
-            cameraMovement = cameraMovement.add(Vector3D.obtain(moveSpeed, 0, 0));
+            right += moveSpeed; // Strafe right
         }
         if (keys[GLFW.GLFW_KEY_Q]) {
-            cameraMovement = cameraMovement.add(Vector3D.obtain(0, moveSpeed, 0));
+            up -= moveSpeed; // Move down
         }
         if (keys[GLFW.GLFW_KEY_E]) {
-            cameraMovement = cameraMovement.add(Vector3D.obtain(0, -moveSpeed, 0));
+            up += moveSpeed; // Move up
         }
         
-        if (cameraMovement.length() > 0) {
-            simulation.moveCamera(cameraMovement);
+        // Apply relative movement if any keys are pressed
+        if (forward != 0 || right != 0 || up != 0) {
+            simulation.moveRelativeCamera(forward, right, up);
         }
     }
 

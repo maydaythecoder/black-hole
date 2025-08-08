@@ -64,6 +64,9 @@ public class PlanetRenderer implements BodyRenderer {
         
         // Restore matrix
         GL11.glPopMatrix();
+        
+        // Draw outline for visibility at any distance
+        drawOutline(planet.getPosition(), planet.getRadius());
     }
     
     private void drawSphere(double radius, int slices, int stacks) {
@@ -139,5 +142,77 @@ public class PlanetRenderer implements BodyRenderer {
         GL11.glEnd();
         
         GL11.glDisable(GL11.GL_BLEND);
+    }
+    
+    /**
+     * Draw a wireframe outline around the celestial body for visibility
+     * SECURITY: Bounds checking on sphere parameters  
+     */
+    private void drawOutline(Vector3D position, double radius) {
+        // SECURITY: Validate radius bounds
+        double safeRadius = Math.max(0.1, Math.min(1000000, radius));
+        
+        GL11.glPushMatrix();
+        GL11.glTranslated(position.x, position.y, position.z);
+        
+        // Disable lighting for outline
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_DEPTH_TEST); // Always visible
+        
+        // Set outline color (bright cyan for planets)
+        GL11.glColor3f(0.0f, 1.0f, 1.0f);
+        GL11.glLineWidth(1.5f);
+        
+        // Draw wireframe sphere (simplified for performance)
+        int segments = 12; // SECURITY: Fixed segment count prevents excessive geometry
+        
+        // Draw longitude lines
+        GL11.glBegin(GL11.GL_LINES);
+        for (int i = 0; i < segments; i++) {
+            double angle = 2 * Math.PI * i / segments;
+            for (int j = 0; j < segments; j++) {
+                double lat0 = Math.PI * j / segments - Math.PI/2;
+                double lat1 = Math.PI * (j + 1) / segments - Math.PI/2;
+                
+                double x0 = safeRadius * Math.cos(lat0) * Math.cos(angle);
+                double y0 = safeRadius * Math.sin(lat0);
+                double z0 = safeRadius * Math.cos(lat0) * Math.sin(angle);
+                
+                double x1 = safeRadius * Math.cos(lat1) * Math.cos(angle);
+                double y1 = safeRadius * Math.sin(lat1);
+                double z1 = safeRadius * Math.cos(lat1) * Math.sin(angle);
+                
+                GL11.glVertex3d(x0, y0, z0);
+                GL11.glVertex3d(x1, y1, z1);
+            }
+        }
+        
+        // Draw latitude lines
+        for (int i = 0; i < segments/2; i++) {
+            double lat = Math.PI * i / (segments/2) - Math.PI/2;
+            double y = safeRadius * Math.sin(lat);
+            double r = safeRadius * Math.cos(lat);
+            
+            for (int j = 0; j < segments; j++) {
+                double angle0 = 2 * Math.PI * j / segments;
+                double angle1 = 2 * Math.PI * (j + 1) / segments;
+                
+                double x0 = r * Math.cos(angle0);
+                double z0 = r * Math.sin(angle0);
+                double x1 = r * Math.cos(angle1);
+                double z1 = r * Math.sin(angle1);
+                
+                GL11.glVertex3d(x0, y, z0);
+                GL11.glVertex3d(x1, y, z1);
+            }
+        }
+        GL11.glEnd();
+        
+        // Re-enable lighting and depth test
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glLineWidth(1.0f);
+        
+        GL11.glPopMatrix();
     }
 }

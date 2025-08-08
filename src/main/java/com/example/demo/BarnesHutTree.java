@@ -145,22 +145,48 @@ public class BarnesHutTree extends SpatialPartitioningTree {
         }
 
         for (int i = 0; i < 8; i++) {
+            if (octants[i].isEmpty()) continue;
+            
             Vector3D octantCenter = getOctantCenter(center, halfSize, i);
-            Node child = buildTree(octants[i], octantCenter, halfSize);
-            if (child != null) {
-                node.addChild(child);
-                if (child instanceof LeafNode) {
-                    CelestialBody childBody = ((LeafNode) child).body;
-                    node.totalMass += childBody.mass;
-                    node.centerOfMass = node.centerOfMass.add(
-                        childBody.position.scale(childBody.mass)
-                    );
-                } else if (child instanceof InternalNode) {
-                    InternalNode internalChild = (InternalNode) child;
-                    node.totalMass += internalChild.totalMass;
-                    node.centerOfMass = node.centerOfMass.add(
-                        internalChild.centerOfMass.scale(internalChild.totalMass)
-                    );
+            
+            // SECURITY: Prevent infinite recursion when bodies are at same/similar positions
+            // If subdivision becomes too small or we have multiple bodies in same location,
+            // create a single leaf node with the first body (simplified approximation)
+            if (halfSize < 1e-10 || (octants[i].size() > 1 && bodiesAreAtSameLocation(octants[i]))) {
+                // Use first body as representative for this location
+                CelestialBody representative = octants[i].get(0);
+                double combinedMass = octants[i].stream().mapToDouble(b -> b.mass).sum();
+                
+                // Create a virtual body with combined mass at the same position
+                CelestialBody virtualBody = new CelestialBody(
+                    "virtual_" + i, combinedMass, representative.radius, 
+                    representative.color, representative.position, Vector3D.ZERO
+                ) {};
+                virtualBody.isStatic = true; // Mark as static since it's virtual
+                
+                LeafNode leafChild = new LeafNode(virtualBody, octantCenter, halfSize);
+                node.addChild(leafChild);
+                node.totalMass += virtualBody.mass;
+                node.centerOfMass = node.centerOfMass.add(
+                    virtualBody.position.scale(virtualBody.mass)
+                );
+            } else {
+                Node child = buildTree(octants[i], octantCenter, halfSize);
+                if (child != null) {
+                    node.addChild(child);
+                    if (child instanceof LeafNode) {
+                        CelestialBody childBody = ((LeafNode) child).body;
+                        node.totalMass += childBody.mass;
+                        node.centerOfMass = node.centerOfMass.add(
+                            childBody.position.scale(childBody.mass)
+                        );
+                    } else if (child instanceof InternalNode) {
+                        InternalNode internalChild = (InternalNode) child;
+                        node.totalMass += internalChild.totalMass;
+                        node.centerOfMass = node.centerOfMass.add(
+                            internalChild.centerOfMass.scale(internalChild.totalMass)
+                        );
+                    }
                 }
             }
         }
@@ -184,6 +210,26 @@ public class BarnesHutTree extends SpatialPartitioningTree {
         double offsetY = ((octantIndex & 2) != 0) ? halfSize : -halfSize;
         double offsetZ = ((octantIndex & 1) != 0) ? halfSize : -halfSize;
         return parentCenter.add(Vector3D.obtain(offsetX, offsetY, offsetZ));
+    }
+    
+    /**
+     * Check if multiple bodies are at the same or very similar location
+     * SECURITY: Prevents infinite subdivision when bodies occupy same space
+     */
+    private boolean bodiesAreAtSameLocation(List<CelestialBody> bodies) {
+        if (bodies.size() <= 1) return false;
+        
+        Vector3D firstPos = bodies.get(0).position;
+        double tolerance = 1e-6; // 1 micrometer tolerance for "same" position
+        
+        for (int i = 1; i < bodies.size(); i++) {
+            Vector3D pos = bodies.get(i).position;
+            double distance = firstPos.subtract(pos).length();
+            if (distance > tolerance) {
+                return false; // Bodies are sufficiently separated
+            }
+        }
+        return true; // All bodies are at essentially the same location
     }
 
     @Override

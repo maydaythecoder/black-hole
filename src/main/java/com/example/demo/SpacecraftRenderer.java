@@ -59,6 +59,9 @@ public class SpacecraftRenderer implements BodyRenderer {
         
         // Restore matrix
         GL11.glPopMatrix();
+        
+        // Draw outline for visibility at any distance
+        drawOutline(spacecraft.getPosition(), spacecraft.getRadius());
     }
     
     private void drawSpacecraft(double size) {
@@ -140,5 +143,69 @@ public class SpacecraftRenderer implements BodyRenderer {
         GL11.glEnd();
         
         GL11.glDisable(GL11.GL_BLEND);
+    }
+    
+    /**
+     * Draw a wireframe outline around the spacecraft for visibility
+     * SECURITY: Bounds checking on geometry parameters
+     */
+    private void drawOutline(Vector3D position, double radius) {
+        // SECURITY: Validate radius bounds
+        double safeRadius = Math.max(0.1, Math.min(1000000, radius));
+        
+        GL11.glPushMatrix();
+        GL11.glTranslated(position.x, position.y, position.z);
+        
+        // Disable lighting for outline
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_DEPTH_TEST); // Always visible
+        
+        // Set outline color (bright green for spacecraft)
+        GL11.glColor3f(0.0f, 1.0f, 0.0f);
+        GL11.glLineWidth(2.0f);
+        
+        // Draw simple wireframe cube outline for spacecraft
+        double size = safeRadius * 2;
+        
+        GL11.glBegin(GL11.GL_LINES);
+        
+        // Bottom face
+        GL11.glVertex3d(-size/2, -size/2, -size/2);
+        GL11.glVertex3d( size/2, -size/2, -size/2);
+        GL11.glVertex3d( size/2, -size/2, -size/2);
+        GL11.glVertex3d( size/2, -size/2,  size/2);
+        GL11.glVertex3d( size/2, -size/2,  size/2);
+        GL11.glVertex3d(-size/2, -size/2,  size/2);
+        GL11.glVertex3d(-size/2, -size/2,  size/2);
+        GL11.glVertex3d(-size/2, -size/2, -size/2);
+        
+        // Top face
+        GL11.glVertex3d(-size/2,  size/2, -size/2);
+        GL11.glVertex3d( size/2,  size/2, -size/2);
+        GL11.glVertex3d( size/2,  size/2, -size/2);
+        GL11.glVertex3d( size/2,  size/2,  size/2);
+        GL11.glVertex3d( size/2,  size/2,  size/2);
+        GL11.glVertex3d(-size/2,  size/2,  size/2);
+        GL11.glVertex3d(-size/2,  size/2,  size/2);
+        GL11.glVertex3d(-size/2,  size/2, -size/2);
+        
+        // Vertical edges
+        GL11.glVertex3d(-size/2, -size/2, -size/2);
+        GL11.glVertex3d(-size/2,  size/2, -size/2);
+        GL11.glVertex3d( size/2, -size/2, -size/2);
+        GL11.glVertex3d( size/2,  size/2, -size/2);
+        GL11.glVertex3d( size/2, -size/2,  size/2);
+        GL11.glVertex3d( size/2,  size/2,  size/2);
+        GL11.glVertex3d(-size/2, -size/2,  size/2);
+        GL11.glVertex3d(-size/2,  size/2,  size/2);
+        
+        GL11.glEnd();
+        
+        // Re-enable lighting and depth test
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glLineWidth(1.0f);
+        
+        GL11.glPopMatrix();
     }
 }
